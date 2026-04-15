@@ -1,0 +1,31 @@
+kind = "web"
+previewPath = "/"
+title = "Environment Variable Manager"
+version = "1.0.0"
+id = "artifacts/env-manager"
+router = "path"
+
+[[integratedSkills]]
+name = "react-vite"
+version = "1.0.0"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 18998
+
+[services.development]
+run = "pnpm --filter @workspace/env-manager run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/env-manager", "run", "build" ]
+publicDir = "artifacts/env-manager/dist/public"
+serve = "static"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "18998"
+BASE_PATH = "/"

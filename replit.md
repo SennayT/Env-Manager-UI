@@ -16,6 +16,10 @@ pnpm workspace monorepo using TypeScript. Each package manages its own dependenc
 - **API codegen**: Orval (from OpenAPI spec)
 - **Build**: esbuild (CJS bundle)
 
+## Artifacts
+
+- **env-manager** — Environment Variable Manager (React + Vite), preview at `/`. Persists to localStorage with a mock API layer. Supports base environments and child environments that inherit variables with override support.
+
 ## Key Commands
 
 - `pnpm run typecheck` — full typecheck across all packages
