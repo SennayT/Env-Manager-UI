@@ -10,12 +10,14 @@ import {
   GitBranch,
   Database,
   Copy,
+  ClipboardPaste,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { EnvVarRow } from "./EnvVarRow";
 import { AddVarForm } from "./AddVarForm";
+import { BulkImportDialog } from "./BulkImportDialog";
 import { mockApi, type Environment, type EnvVar } from "@/lib/mockApi";
 import { useToast } from "@/hooks/use-toast";
 
@@ -39,6 +41,7 @@ export function EnvironmentCard({
   const [open, setOpen] = useState(defaultOpen);
   const [editingName, setEditingName] = useState(false);
   const [nameValue, setNameValue] = useState(env.name);
+  const [bulkOpen, setBulkOpen] = useState(false);
   const { toast } = useToast();
 
   const resolved = mockApi.resolveVariables(env, allEnvs);
@@ -68,6 +71,19 @@ export function EnvironmentCard({
     const next = env.variables.filter((v) => v.key !== key);
     onUpdate(env.id, { variables: next });
     toast({ title: "Variable removed", description: key, variant: "destructive" });
+  }
+
+  function handleBulkImport(newVars: EnvVar[]) {
+    const existingMap = new Map(env.variables.map((v) => [v.key, v.value]));
+    for (const v of newVars) {
+      existingMap.set(v.key, v.value);
+    }
+    const merged = Array.from(existingMap.entries()).map(([key, value]) => ({ key, value }));
+    onUpdate(env.id, { variables: merged });
+    toast({
+      title: "Variables imported",
+      description: `${newVars.length} variable${newVars.length !== 1 ? "s" : ""} saved to ${env.name}`,
+    });
   }
 
   function handleCopyAll() {
@@ -174,6 +190,16 @@ export function EnvironmentCard({
             <Copy className="h-3.5 w-3.5" />
           </Button>
 
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-7 w-7"
+            title="Bulk paste variables"
+            onClick={(e) => { e.stopPropagation(); setBulkOpen(true); }}
+          >
+            <ClipboardPaste className="h-3.5 w-3.5" />
+          </Button>
+
           {!editingName && (
             <Button
               variant="ghost"
@@ -248,6 +274,13 @@ export function EnvironmentCard({
           )}
         </div>
       )}
+
+      <BulkImportDialog
+        open={bulkOpen}
+        onClose={() => setBulkOpen(false)}
+        existingKeys={env.variables.map((v) => v.key)}
+        onImport={handleBulkImport}
+      />
     </div>
   );
 }
